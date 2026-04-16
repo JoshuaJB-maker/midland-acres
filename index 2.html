@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midland Acres — Farm Management</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;font-size:14px}
+.header{background:#1a3a2a;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header h1{font-size:18px;font-weight:600;letter-spacing:0.3px}
+.header .sub{font-size:12px;opacity:0.7;margin-top:2px}
+.nav{display:flex;gap:2px;background:#fff;padding:8px 16px;border-bottom:1px solid #e5e5e0;flex-wrap:wrap}
+.nav button{padding:6px 14px;border-radius:6px;border:none;background:transparent;font-size:13px;color:#555;cursor:pointer;font-family:inherit}
+.nav button:hover{background:#f0f0eb}
+.nav button.active{background:#1a3a2a;color:white}
+.content{max-width:1200px;margin:0 auto;padding:20px 16px}
+.section{display:none}.section.active{display:block}
+.card{background:white;border:1px solid #e5e5e0;border-radius:10px;padding:16px 20px;margin-bottom:16px}
+.card h3{font-size:15px;font-weight:600;margin-bottom:12px;color:#1a1a1a}
+.card h4{font-size:13px;font-weight:600;margin-bottom:8px;color:#444}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.metric{background:#f8f8f5;border-radius:8px;padding:12px}
+.metric .label{font-size:11px;color:#666;margin-bottom:4px}
+.metric .value{font-size:22px;font-weight:600;color:#1a3a2a}
+.metric .sub{font-size:10px;color:#999;margin-top:2px}
+.gr{display:grid;gap:10px;margin-bottom:10px}
+.gr2{grid-template-columns:1fr 1fr}
+.gr3{grid-template-columns:1fr 1fr 1fr}
+.gr4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:600px){.gr2,.gr3,.gr4{grid-template-columns:1fr}}
+.fg label{display:block;font-size:11px;color:#666;margin-bottom:3px;font-weight:500}
+.fg input,.fg select,.fg textarea{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px;font-family:inherit;background:white;color:#1a1a1a}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#1a3a2a;box-shadow:0 0 0 2px rgba(26,58,42,0.1)}
+.fg textarea{height:60px;resize:vertical}
+.btn{padding:8px 18px;border-radius:6px;border:1px solid #ccc;background:white;font-size:13px;color:#333;cursor:pointer;font-family:inherit}
+.btn:hover{background:#f5f5f0}
+.btnp{background:#1a3a2a;color:white;border-color:#1a3a2a}
+.btnp:hover{background:#143020;border-color:#143020}
+.btns{padding:4px 10px;font-size:11px}
+.btnr{color:#c0392b;border-color:#e74c3c}.btnr:hover{background:#fdf0f0}
+.divider{height:1px;background:#f0f0eb;margin:12px 0}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.b-blue{background:#e8f0fe;color:#1557b0}.b-red{background:#fce8e6;color:#c0392b}
+.b-grn{background:#e6f4ea;color:#1e7e34}.b-teal{background:#e0f5f1;color:#0d6e56}
+.b-amb{background:#fef3e2;color:#8a6100}.b-pur{background:#f0ebfe;color:#5b2d8e}
+.b-gry{background:#f0f0f0;color:#555}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:6px 8px;background:#f8f8f5;color:#666;font-weight:600;border-bottom:1px solid #e5e5e0;white-space:nowrap}
+.tbl td{padding:7px 8px;border-bottom:1px solid #f0f0eb;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafaf8}
+.empty{text-align:center;padding:2rem;color:#999;font-size:13px}
+.chdr{font-size:12px;font-weight:600;padding:6px 10px;background:#f0f5f0;border-radius:6px;margin:12px 0 6px;color:#1a3a2a;border-left:3px solid #1a3a2a}
+.bar-wrap{height:7px;background:#f0f0eb;border-radius:4px;overflow:hidden;margin-top:4px}
+.bar{height:100%;border-radius:4px}
+.bar-ok{background:#2ecc71}.bar-low{background:#f39c12}.bar-crit{background:#e74c3c}
+.tag-ok{color:#1e7e34;font-size:11px;font-weight:600}.tag-low{color:#8a6100;font-size:11px;font-weight:600}
+.tag-crit{color:#c0392b;font-size:11px;font-weight:600}
+.alert-box{background:#fce8e6;border:1px solid #e74c3c;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#c0392b}
+.warn-box{background:#fef3e2;border:1px solid #f39c12;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:12px;color:#8a6100}
+.harvest-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+.hcard{border-radius:8px;border:1px solid #e5e5e0;padding:12px;background:white}
+.hcard .ht{font-size:12px;font-weight:600;color:#444;margin-bottom:4px}
+.hcard .hd{font-size:17px;font-weight:700}
+.hcard .hs{font-size:11px;margin-top:2px}
+.hcard .hp{font-size:10px;color:#999;margin-top:4px}
+.safe-yes{color:#1e7e34}.safe-soon{color:#8a6100}.safe-no{color:#c0392b}
+.q-card{border-radius:8px;border:1px solid #e5e5e0;padding:10px 12px;margin-bottom:6px;cursor:pointer;border-left:3px solid #ccc}
+.q-card:hover{background:#fafaf8}
+.q-card.sel{background:#f0f5f0;border-color:#1a3a2a}
+.q-name{font-size:13px;font-weight:600}
+.cal-wrap{overflow-x:auto}
+.cal-tbl{width:100%;border-collapse:collapse;font-size:11px;min-width:650px}
+.cal-tbl th{padding:5px 6px;background:#f8f8f5;text-align:center;font-weight:600;color:#555;border-bottom:1px solid #e5e5e0;white-space:nowrap;font-size:10px}
+.cal-tbl th.left{text-align:left;min-width:150px}
+.cal-tbl td{padding:4px 5px;border-bottom:1px solid #f5f5f0;vertical-align:middle}
+.cal-tbl tr.shdr td{background:#f8f8f5;font-size:11px;font-weight:600;color:#1a3a2a;padding:5px 6px}
+.cal-tbl tr.stage td{background:#f0f5f0;font-size:10px;color:#555;text-align:center;padding:3px 4px}
+.dot{width:16px;height:16px;border-radius:50%;border:1px solid #ccc;background:white;cursor:pointer;display:inline-block;flex-shrink:0}
+.dot.suggested{background:#fef3e2;border-color:#f39c12}
+.dot.planned{background:#e8f0fe;border-color:#1557b0}
+.dot.done{background:#e6f4ea;border-color:#1e7e34}
+.dot.skip{background:#f5f5f5;border-color:#ddd;opacity:0.5}
+.block-tabs{display:flex;gap:4px;margin-bottom:10px}
+.btab{padding:5px 12px;border-radius:6px;border:1px solid #ddd;background:white;font-size:12px;color:#555;cursor:pointer}
+.btab.on{background:#1a3a2a;color:white;border-color:#1a3a2a}
+.phi-warn{font-size:10px;color:#8a6100;background:#fef3e2;padding:2px 5px;border-radius:3px;display:inline-block}
+.collect-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0eb}
+.collect-row:last-child{border-bottom:none}
+.cqty{font-size:20px;font-weight:700;color:#1a3a2a}
+.csub{font-size:11px;color:#777;margin-top:1px}
+.scard{border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid}
+.type-pill{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;font-weight:600;margin-right:3px}
+.pill-s{background:#e8f0fe;color:#1557b0}.pill-f{background:#e6f4ea;color:#1e7e34}.pill-i{background:#e0f5f1;color:#0d6e56}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
+.leg-dot{width:12px;height:12px;border-radius:50%;border:1px solid}
+.pivot-labels text{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="h1">🌶 Midland Acres</div>
+    <div class="sub">Paprika Farm Management · Season 2025/26</div>
+  </div>
+  <div id="hdr-date" style="font-size:12px;opacity:0.8"></div>
+</div>
+
+<div class="nav" id="main-nav">
+  <button class="active" onclick="ST('overview',this)">Overview</button>
+  <button onclick="ST('pivot',this)">Pivot Quarters</button>
+  <button onclick="ST('calendar',this)">Calendar</button>
+  <button onclick="ST('spraylog',this)">Spray &amp; Fert Log</button>
+  <button onclick="ST('irrigation',this)">Irrigation</button>
+  <button onclick="ST('inventory',this)">Chemical Inventory</button>
+  <button onclick="ST('tasks',this)">Tasks</button>
+  <button onclick="ST('reports',this)">Reports</button>
+</div>
+
+<div class="content">
+
+<!-- OVERVIEW -->
+<div id="overview" class="section active">
+  <div class="metrics" id="ov-metrics"></div>
+  <div class="card">
+    <h3>Next safe harvest date</h3>
+    <p style="font-size:11px;color:#777;margin-bottom:10px">Calculated from last spray per field using the longest PHI applied.</p>
+    <div class="harvest-grid" id="harvest-panel"><div class="empty">Log spray records with PHI to see safe harvest dates.</div></div>
+  </div>
+  <div class="card">
+    <h3>Blocks</h3>
+    <div style="padding:10px 0;border-bottom:1px solid #f0f0eb">
+      <div style="font-size:14px;font-weight:600">🔵 Block A — Centre Pivot <span class="badge b-blue">18 ha</span></div>
+      <div style="font-size:12px;color:#666;margin-top:3px">Paprika · 4 quarters (Q1–Q4, ~4.5 ha each) · Spray line on pivot + knapsacks</div>
+    </div>
+    <div style="padding:10px 0">
+      <div style="font-size:14px;font-weight:600">🟢 Block B — Overhead <span class="badge b-grn">7 ha</span></div>
+      <div style="font-size:12px;color:#666;margin-top:3px">Paprika · Moveable pipe irrigation · Tractor + knapsack spraying</div>
+    </div>
+  </div>
+  <div class="card"><h3>Recent activity</h3><div id="recent-act"><div class="empty">No activity yet.</div></div></div>
+</div>
+
+<!-- PIVOT -->
+<div id="pivot" class="section">
+  <div class="card">
+    <h3>Block A — Centre Pivot quarters</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:14px">Each quarter (~4.5 ha) can be irrigated and sprayed independently. Click a quarter to log or view.</p>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start">
+      <div style="flex:0 0 240px">
+        <svg viewBox="0 0 240 240" style="width:100%;max-width:240px">
+          <circle cx="120" cy="120" r="108" fill="none" stroke="#ddd" stroke-width="1"/>
+          <circle cx="120" cy="120" r="12" fill="#f8f8f5" stroke="#ddd"/>
+          <path id="sv-Q1" d="M120,120 L120,12 A108,108 0 0,1 228,120 Z" fill="#e8f0fe" stroke="white" stroke-width="2" cursor="pointer" onclick="selQ('Q1')"/>
+          <path id="sv-Q2" d="M120,120 L228,120 A108,108 0 0,1 120,228 Z" fill="#e6f4ea" stroke="white" stroke-width="2" cursor="pointer" onclick="selQ('Q2')"/>
+          <path id="sv-Q3" d="M120,120 L120,228 A108,108 0 0,1 12,120 Z" fill="#fef3e2" stroke="white" stroke-width="2" cursor="pointer" onclick="selQ('Q3')"/>
+          <path id="sv-Q4" d="M120,120 L12,120 A108,108 0 0,1 120,12 Z" fill="#f0ebfe" stroke="white" stroke-width="2" cursor="pointer" onclick="selQ('Q4')"/>
+          <line x1="120" y1="12" x2="120" y2="228" stroke="white" stroke-width="2"/>
+          <line x1="12" y1="120" x2="228" y2="120" stroke="white" stroke-width="2"/>
+          <text x="168" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="#1557b0" class="pivot-labels">Q1</text>
+          <text x="168" y="96" text-anchor="middle" font-size="9" fill="#1557b0" class="pivot-labels">4.5 ha</text>
+          <text x="172" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#1e7e34" class="pivot-labels">Q2</text>
+          <text x="172" y="182" text-anchor="middle" font-size="9" fill="#1e7e34" class="pivot-labels">4.5 ha</text>
+          <text x="72" y="168" text-anchor="middle" font-size="14" font-weight="700" fill="#8a6100" class="pivot-labels">Q3</text>
+          <text x="72" y="182" text-anchor="middle" font-size="9" fill="#8a6100" class="pivot-labels">4.5 ha</text>
+          <text x="68" y="82" text-anchor="middle" font-size="14" font-weight="700" fill="#5b2d8e" class="pivot-labels">Q4</text>
+          <text x="68" y="96" text-anchor="middle" font-size="9" fill="#5b2d8e" class="pivot-labels">4.5 ha</text>
+          <text x="120" y="116" text-anchor="middle" font-size="8" fill="#999" class="pivot-labels">pivot</text>
+          <text x="120" y="8" text-anchor="middle" font-size="8" fill="#999" class="pivot-labels">N</text>
+          <text x="234" y="123" font-size="8" fill="#999" class="pivot-labels">E</text>
+          <text x="120" y="237" text-anchor="middle" font-size="8" fill="#999" class="pivot-labels">S</text>
+          <text x="3" y="123" font-size="8" fill="#999" class="pivot-labels">W</text>
+        </svg>
+        <div style="font-size:10px;color:#999;text-align:center;margin-top:4px">Click a quarter to select</div>
+      </div>
+      <div style="flex:1;min-width:220px" id="q-cards"></div>
+    </div>
+    <div id="q-form" style="display:none;margin-top:16px;background:#f8f8f5;border-radius:8px;padding:14px">
+      <h4 id="q-form-title">Log activity for Q1</h4>
+      <div class="gr gr2">
+        <div class="fg"><label>Activity type</label>
+          <select id="q-type" onchange="qTypeChange()">
+            <option value="irrigation">Irrigation</option>
+            <option value="spray">Spray</option>
+            <option value="fert">Fertiliser</option>
+          </select>
+        </div>
+        <div class="fg"><label>Date</label><input type="date" id="q-date"></div>
+      </div>
+      <div id="q-irr-f">
+        <div class="gr gr3">
+          <div class="fg"><label>Duration (hrs)</label><input type="number" id="q-dur" placeholder="e.g. 2" step="0.5"></div>
+          <div class="fg"><label>mm applied</label><input type="number" id="q-mm" placeholder="e.g. 12"></div>
+          <div class="fg"><label>Notes</label><input type="text" id="q-notes" placeholder="Observations"></div>
+        </div>
+      </div>
+      <div id="q-spray-f" style="display:none">
+        <div class="gr gr2">
+          <div class="fg"><label>Trade name</label>
+            <select id="q-prod" onchange="qAutoFill()">
+              <option value="">— select —</option>
+              <option value="Amistar Xtra|Azoxystrobin + Difenoconazole|0.5 l/ha|14">Amistar Xtra</option>
+              <option value="Signum|Pyraclostrobin + Boscalid|500 g/ha|7">Signum</option>
+              <option value="Folicur|Tebuconazole|500 ml/ha|7">Folicur</option>
+              <option value="Thiovit|Sulphur|25 kg/ha|0">Thiovit / Sulphur</option>
+              <option value="Cuperdem|Copper hydroxide|250 ml/ha|7">Cuperdem / Copper</option>
+              <option value="Karate|Lambda-cyhalothrin|1.7 l/ha|5">Karate / Lambda</option>
+              <option value="Decis|Deltamethrin|1.7 l/ha|5">Delta / Decis</option>
+              <option value="Delegate|Spinotoram|12g/100L|0">Delegate (Spinotoram)</option>
+              <option value="Proclaim|Emmamectin|300 g/ha|7">Proclaim (Emmamectin)</option>
+              <option value="Match|Lufenuron|100 g/ha|3">Match (Lufenuron)</option>
+              <option value="Coragen|Chlorantraniliprole|150 ml/ha|3">Coragen</option>
+              <option value="Runner|Methoxyfenozide|0.5 l/ha|3">Runner</option>
+              <option value="Regent|Fipronil|500 ml/ha|7">Regent / Fipronil</option>
+              <option value="other||">Other</option>
+            </select>
+          </div>
+          <div class="fg"><label>Active ingredient</label><input type="text" id="q-active" placeholder="Auto-filled"></div>
+        </div>
+        <div class="gr gr3">
+          <div class="fg"><label>Rate</label><input type="text" id="q-rate" placeholder="e.g. 0.5 l/ha"></div>
+          <div class="fg"><label>PHI (days)</label><input type="number" id="q-phi" placeholder="e.g. 7"></div>
+          <div class="fg"><label>Operator</label><input type="text" id="q-op" placeholder="Name"></div>
+        </div>
+      </div>
+      <div id="q-fert-f" style="display:none">
+        <div class="gr gr2">
+          <div class="fg"><label>Fertiliser name</label><input type="text" id="q-fname" placeholder="e.g. Calcium Nitrate"></div>
+          <div class="fg"><label>Rate</label><input type="text" id="q-frate" placeholder="e.g. 10 kg/ha"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btnp" onclick="saveQ()">Save</button>
+        <button class="btn" onclick="document.getElementById('q-form').style.display='none'">Cancel</button>
+      </div>
+    </div>
+    <div id="q-history" style="display:none;margin-top:16px">
+      <h4 id="q-hist-title" style="font-size:13px;font-weight:600;color:#444;margin-bottom:8px"></h4>
+      <div style="overflow-x:auto">
+        <table class="tbl" id="q-hist-tbl">
+          <thead><tr><th>Date</th><th>Type</th><th>Product / detail</th><th>Rate</th><th>mm/hrs</th><th>PHI</th><th>Safe harvest</th><th>Operator</th></tr></thead>
+          <tbody id="q-hist-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="q-hist-empty" style="display:none">No activity for this quarter yet.</div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div id="calendar" class="section">
+  <div class="card" style="margin-bottom:8px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <h3 style="margin-bottom:3px">Spray &amp; fertiliser calendar — 2025/26</h3>
+        <div style="font-size:11px;color:#666">Wks 23–31 · 04 Apr – 30 May 2026 · Rates per ha · Planted 1 Nov 2025</div>
+      </div>
+      <div class="block-tabs">
+        <button class="btab on" onclick="showBlk('A',this)">Block A (18 ha)</button>
+        <button class="btab" onclick="showBlk('B',this)">Block B (7 ha)</button>
+      </div>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#fef3e2;border-color:#f39c12"></div>Suggested</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e8f0fe;border-color:#1557b0"></div>Planned</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#e6f4ea;border-color:#1e7e34"></div>Done</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#f5f5f5;border-color:#ddd;opacity:0.5"></div>Skip</div>
+    <span style="font-size:11px;color:#999">Click dot to cycle</span>
+  </div>
+  <div class="card">
+    <div class="cal-wrap"><table class="cal-tbl" id="cal-A"><thead><tr><th class="left">Product</th><th class="left">Rate/ha</th><th>Wk23<br>04Apr</th><th>Wk24<br>11Apr</th><th>Wk25<br>18Apr</th><th>Wk26<br>25Apr</th><th>Wk27<br>02May</th><th>Wk28<br>09May</th><th>Wk29<br>16May</th><th>Wk30<br>23May</th><th>Wk31<br>30May</th><th>PHI</th><th style="min-width:150px">Notes</th></tr><tr class="stage"><td class="left" colspan="2">Stage</td><td>Pre-Harv</td><td>Pre-Harv</td><td>Harvest</td><td>Harvest</td><td>Harvest</td><td>Harvest</td><td>Post-Harv</td><td>Post-Harv</td><td>Post-Harv</td><td></td><td></td></tr></thead><tbody id="cal-body-A"></tbody></table></div>
+    <div class="cal-wrap" style="display:none"><table class="cal-tbl" id="cal-B"><thead><tr><th class="left">Product</th><th class="left">Rate/ha</th><th>Wk23<br>04Apr</th><th>Wk24<br>11Apr</th><th>Wk25<br>18Apr</th><th>Wk26<br>25Apr</th><th>Wk27<br>02May</th><th>Wk28<br>09May</th><th>Wk29<br>16May</th><th>Wk30<br>23May</th><th>Wk31<br>30May</th><th>PHI</th><th style="min-width:150px">Notes</th></tr><tr class="stage"><td class="left" colspan="2">Stage</td><td>Pre-Harv</td><td>Pre-Harv</td><td>Harvest</td><td>Harvest</td><td>Harvest</td><td>Harvest</td><td>Post-Harv</td><td>Post-Harv</td><td>Post-Harv</td><td></td><td></td></tr></thead><tbody id="cal-body-B"></tbody></table></div>
+  </div>
+  <div style="background:#f8f8f5;border-radius:8px;padding:12px;font-size:12px;color:#555">
+    <strong style="display:block;margin-bottom:6px;color:#1a3a2a">Key reminders</strong>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">
+      <div>· Same product TWICE then CHANGE GROUP — never back-to-back</div>
+      <div>· Bi-weekly applications unless pressure severe</div>
+      <div>· Apply pyrethroids after irrigation at field capacity</div>
+      <div>· FCM strict 5-week intervals all season</div>
+      <div>· Chemical records COMPULSORY per Midland Acres docs</div>
+      <div>· Dry fruit to ≤12% moisture before bagging</div>
+    </div>
+  </div>
+</div>
+
+<!-- SPRAY & FERT LOG -->
+<div id="spraylog" class="section">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <h3 style="margin-bottom:0">Log application</h3>
+      <button id="t-spray" class="btn btnp btns" onclick="setT('spray')">Spray</button>
+      <button id="t-fert" class="btn btns" onclick="setT('fert')">Fertiliser</button>
+    </div>
+    <input type="hidden" id="e-type" value="spray">
+    <div class="gr gr2">
+      <div class="fg"><label>Date</label><input type="date" id="e-date"></div>
+      <div class="fg"><label>Block / field</label>
+        <select id="e-block" onchange="eBlockChange()">
+          <option value="Block A — Centre Pivot (18 ha)" data-ha="18">Block A — Centre Pivot (18 ha)</option>
+          <option value="Block A — Q1 (4.5 ha)" data-ha="4.5">Block A — Q1 (4.5 ha)</option>
+          <option value="Block A — Q2 (4.5 ha)" data-ha="4.5">Block A — Q2 (4.5 ha)</option>
+          <option value="Block A — Q3 (4.5 ha)" data-ha="4.5">Block A — Q3 (4.5 ha)</option>
+          <option value="Block A — Q4 (4.5 ha)" data-ha="4.5">Block A — Q4 (4.5 ha)</option>
+          <option value="Block B — Overhead (7 ha)" data-ha="7">Block B — Overhead (7 ha)</option>
+          <option value="Both blocks (25 ha)" data-ha="25">Both blocks (25 ha)</option>
+        </select>
+      </div>
+    </div>
+    <div id="spray-fields">
+      <div class="gr gr2">
+        <div class="fg"><label>Category</label>
+          <select id="e-cat" onchange="eCatChange()">
+            <option value="">— all —</option>
+            <option value="fungicide">Fungicide</option>
+            <option value="pesticide">Pesticide / Insecticide</option>
+            <option value="herbicide">Herbicide</option>
+            <option value="foliar">Foliar / Biostimulant</option>
+          </select>
+        </div>
+        <div class="fg"><label>Trade name</label>
+          <select id="e-prod" onchange="eAutoFill()">
+            <option value="">— select category first —</option>
+          </select>
+        </div>
+      </div>
+      <div class="gr gr2" style="margin-top:0">
+        <div class="fg"><label>Active ingredient(s)</label><input type="text" id="e-active" placeholder="Auto-filled"></div>
+        <div class="fg"><label>Stock balance</label><input type="text" id="e-balance" placeholder="Auto-filled" readonly style="background:#f8f8f5;color:#666"></div>
+      </div>
+    </div>
+    <div id="fert-fields" style="display:none">
+      <div class="gr gr2">
+        <div class="fg"><label>Fertiliser trade name</label><input type="text" id="e-fname" placeholder="e.g. Calcium Nitrate"></div>
+        <div class="fg"><label>Nutrient / analysis</label><input type="text" id="e-fnutrient" placeholder="e.g. 15.5% N, 19% Ca"></div>
+      </div>
+    </div>
+    <div class="gr gr3">
+      <div class="fg"><label>Rate / ha</label><input type="text" id="e-rate" placeholder="e.g. 0.5" oninput="eCalcQty()"></div>
+      <div class="fg"><label>Ha sprayed</label><input type="number" id="e-ha" placeholder="auto-filled" step="0.5" oninput="eCalcQty()"></div>
+      <div class="fg"><label>PHI (days)</label><input type="text" id="e-phi" placeholder="e.g. 7"></div>
+    </div>
+    <div class="gr gr3">
+      <div class="fg"><label>Total qty needed</label>
+        <input type="text" id="e-qty" placeholder="auto-calculated" style="background:#f0f5f0;font-weight:600">
+      </div>
+      <div class="fg"><label>Method</label>
+        <select id="e-method"><option>Pivot spray line</option><option>Tractor boom</option><option>Knapsack</option><option>Full cover spray</option></select>
+      </div>
+      <div class="fg"><label>Operator</label><input type="text" id="e-op" placeholder="Name"></div>
+    </div>
+    <div class="gr" style="grid-template-columns:1fr"><div class="fg"><label>Notes</label><textarea id="e-notes" placeholder="Target pest, PHI compliance..."></textarea></div></div>
+    <button class="btn btnp" onclick="saveEntry()">Save record</button>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <h3 style="margin-bottom:0">Application history</h3>
+      <div style="display:flex;gap:6px">
+        <select id="f-block" onchange="renderLog()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid #ddd"><option value="">All blocks</option><option value="Block A">Block A</option><option value="Block B">Block B</option></select>
+        <select id="f-type" onchange="renderLog()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid #ddd"><option value="">All</option><option value="spray">Spray</option><option value="fert">Fert</option></select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="tbl" id="e-tbl" style="display:none">
+        <thead><tr><th>Date</th><th>Type</th><th>Block</th><th>Trade name</th><th>Active</th><th>Rate/ha</th><th>Ha</th><th>Total qty</th><th>PHI</th><th>Safe harvest</th><th>Method</th><th>Operator</th></tr></thead>
+        <tbody id="e-body"></tbody>
+      </table>
+    </div>
+    <div class="empty" id="e-empty">No records yet.</div>
+  </div>
+</div>
+
+<!-- IRRIGATION -->
+<div id="irrigation" class="section">
+  <div class="card">
+    <h3>Log irrigation run</h3>
+    <div class="gr gr2">
+      <div class="fg"><label>Date</label><input type="date" id="i-date"></div>
+      <div class="fg"><label>Block / quarter</label>
+        <select id="i-block">
+          <option>Block A — Full pivot (18 ha)</option>
+          <option>Block A — Q1 (4.5 ha)</option><option>Block A — Q2 (4.5 ha)</option>
+          <option>Block A — Q3 (4.5 ha)</option><option>Block A — Q4 (4.5 ha)</option>
+          <option>Block B — Overhead (7 ha)</option>
+        </select>
+      </div>
+    </div>
+    <div class="gr gr3">
+      <div class="fg"><label>Duration (hrs)</label><input type="number" id="i-dur" placeholder="e.g. 4" step="0.5"></div>
+      <div class="fg"><label>mm applied</label><input type="number" id="i-mm" placeholder="e.g. 25"></div>
+      <div class="fg"><label>Method</label><select id="i-method"><option>Centre pivot</option><option>Moveable pipes</option></select></div>
+    </div>
+    <div class="gr" style="grid-template-columns:1fr"><div class="fg"><label>Notes</label><textarea id="i-notes" placeholder="Observations..."></textarea></div></div>
+    <button class="btn btnp" onclick="saveIrr()">Save record</button>
+  </div>
+  <div class="card">
+    <h3>Irrigation history</h3>
+    <table class="tbl" id="i-tbl" style="display:none"><thead><tr><th>Date</th><th>Block / Quarter</th><th>Method</th><th>Duration</th><th>mm</th><th>Notes</th></tr></thead><tbody id="i-body"></tbody></table>
+    <div class="empty" id="i-empty">No records yet.</div>
+  </div>
+</div>
+
+<!-- CHEMICAL INVENTORY -->
+<div id="inventory" class="section">
+  <div class="nav" style="margin-bottom:16px;background:transparent;padding:0;border:none">
+    <button class="btab on" onclick="invTab('inv-list',this)">Inventory</button>
+    <button class="btab" onclick="invTab('inv-calc',this)">Spray Calculator</button>
+    <button class="btab" onclick="invTab('inv-add',this)">Add / Edit</button>
+    <button class="btab" onclick="invTab('inv-alerts',this)">Stock Alerts</button>
+  </div>
+  <div id="inv-list">
+    <div id="inv-low-ban"></div>
+    <div id="inv-body"><div class="empty">No chemicals yet — use Add / Edit to build your inventory.</div></div>
+  </div>
+  <div id="inv-calc" style="display:none">
+    <div class="card">
+      <h3>Spray collection calculator</h3>
+      <p style="font-size:12px;color:#666;margin-bottom:12px">Select equipment, field and chemicals. Get exact quantities to collect from stores.</p>
+      <div class="gr gr2">
+        <div class="fg"><label>Equipment / method</label>
+          <select id="cc-meth" onchange="calcUpd()">
+            <option value="boom">Boom spray (200 L/ha)</option>
+            <option value="knap">Knapsacks (200 L/ha)</option>
+            <option value="pivot">Pivot spray line (600 L/ha — 2× chemical)</option>
+          </select>
+        </div>
+        <div class="fg"><label>Field / quarter</label>
+          <select id="cc-field" onchange="calcUpd()">
+            <option value="18">Block A — Full pivot (18 ha)</option>
+            <option value="4.5">Block A — Q1 (4.5 ha)</option>
+            <option value="4.5">Block A — Q2 (4.5 ha)</option>
+            <option value="4.5">Block A — Q3 (4.5 ha)</option>
+            <option value="4.5">Block A — Q4 (4.5 ha)</option>
+            <option value="7">Block B — Overhead (7 ha)</option>
+            <option value="25">Both blocks (25 ha)</option>
+            <option value="custom">Custom →</option>
+          </select>
+        </div>
+      </div>
+      <div class="gr gr2" id="cc-custom-row" style="display:none">
+        <div class="fg"><label>Custom ha</label><input type="number" id="cc-ha" placeholder="e.g. 9" min="0" step="0.5" oninput="calcUpd()"></div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Select chemicals</div>
+      <div id="cc-pills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">Additives</div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px">
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="cc-wet" onchange="calcUpd()" style="width:14px;height:14px"> Wetter
+          <select id="cc-wet-sel" onchange="calcUpd()" style="font-size:12px;max-width:150px;padding:4px;border:1px solid #ddd;border-radius:5px"><option value="">— select —</option></select>
+        </label>
+        <label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="cc-buf" onchange="calcUpd()" style="width:14px;height:14px"> Buffer
+          <select id="cc-buf-sel" onchange="calcUpd()" style="font-size:12px;max-width:150px;padding:4px;border:1px solid #ddd;border-radius:5px"><option value="">— select —</option></select>
+        </label>
+      </div>
+    </div>
+    <div id="cc-out" style="display:none">
+      <div class="card"><h3>Collect from stores</h3><div id="cc-rows"></div><div id="cc-warn"></div></div>
+    </div>
+  </div>
+  <div id="inv-add" style="display:none">
+    <div class="card">
+      <h3 id="inv-form-title">Add chemical to inventory</h3>
+      <input type="hidden" id="f-id">
+      <div class="gr gr2">
+        <div class="fg"><label>Category</label>
+          <select id="f-cat" onchange="fToggleWet()">
+            <option value="fungicide">Fungicide</option><option value="pesticide">Pesticide / Insecticide</option>
+            <option value="herbicide">Herbicide</option><option value="foliar">Foliar spray (liquid)</option>
+            <option value="granular">Granular fertiliser (spraying)</option><option value="fertiliser">Fertiliser</option>
+            <option value="wetter">Wetter</option><option value="buffer">Buffer</option>
+          </select>
+        </div>
+        <div class="fg"><label>Trade name</label><input type="text" id="f-name" placeholder="e.g. Amistar Xtra"></div>
+      </div>
+      <div class="gr gr2">
+        <div class="fg"><label>Active ingredient / analysis</label><input type="text" id="f-active" placeholder="e.g. Azoxystrobin + Difenoconazole"></div>
+        <div class="fg"><label>Supplier</label><input type="text" id="f-supplier" placeholder="e.g. Cropserve"></div>
+      </div>
+      <div class="gr gr3">
+        <div class="fg"><label>PHI (days)</label><input type="number" id="f-phi" placeholder="e.g. 7" min="0"></div>
+        <div class="fg"><label>Unit</label><select id="f-unit"><option value="L">L (liquid)</option><option value="kg">kg (solid)</option><option value="g">g (powder)</option><option value="tubes">tubes</option></select></div>
+        <div class="fg"><label>Current stock in store</label><input type="number" id="f-stock" placeholder="e.g. 20" min="0" step="0.001"></div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">Spray rates per ha</div>
+      <p style="font-size:11px;color:#777;margin-bottom:8px">Boom = standard rate. Knapsack = same as boom if blank. Pivot auto-doubles chemical (override if needed).</p>
+      <div class="gr gr3">
+        <div class="fg"><label>Boom spray (per ha)</label><input type="number" id="f-boom" placeholder="e.g. 0.5" min="0" step="0.001" oninput="fAutoPivot()"></div>
+        <div class="fg"><label>Knapsack (same as boom if blank)</label><input type="number" id="f-knap" placeholder="same as boom" min="0" step="0.001"></div>
+        <div class="fg"><label>Pivot (auto 2× boom)</label><input type="number" id="f-pivot" placeholder="auto" min="0" step="0.001" style="background:#f8f8f5"></div>
+      </div>
+      <div id="f-wet-row" style="display:none">
+        <div class="gr gr2">
+          <div class="fg"><label>Rate per 100 L water</label><input type="number" id="f-wrate" placeholder="e.g. 20" min="0" step="0.1"></div>
+          <div class="fg"><label>Unit per 100L</label><select id="f-wunit"><option value="ml">ml / 100L</option><option value="g">g / 100L</option></select></div>
+        </div>
+      </div>
+      <div class="gr gr2">
+        <div class="fg"><label>Min stock alert level</label><input type="number" id="f-min" placeholder="e.g. 5" min="0" step="0.1"></div>
+        <div class="fg"><label>Notes</label><input type="text" id="f-notes" placeholder="Storage, handling..."></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btnp" onclick="fSave()">Save</button>
+        <button class="btn" onclick="fClear()">Clear</button>
+        <button class="btn btns btnr" id="f-del" style="display:none" onclick="fDelete()">Delete</button>
+      </div>
+      <div id="f-msg" style="font-size:12px;color:#1e7e34;margin-top:6px;height:16px"></div>
+    </div>
+    <div class="card"><h3>Current inventory — click to edit</h3><div id="f-edit-list"></div></div>
+  </div>
+  <div id="inv-alerts" style="display:none">
+    <div class="card">
+      <h3>Future spray planner &amp; stock check</h3>
+      <p style="font-size:12px;color:#666;margin-bottom:12px">Add planned sprays to check if current stocks are sufficient.</p>
+      <div style="background:#f8f8f5;border-radius:8px;padding:14px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">Add a planned spray</div>
+        <div class="gr gr3">
+          <div class="fg"><label>Chemical</label><select id="p-chem"><option value="">— select —</option></select></div>
+          <div class="fg"><label>Method</label><select id="p-meth"><option value="boom">Boom spray</option><option value="knap">Knapsacks</option><option value="pivot">Pivot spray line</option></select></div>
+          <div class="fg"><label>Area</label><select id="p-field"><option value="18">Block A full (18 ha)</option><option value="4.5">Q1 (4.5 ha)</option><option value="4.5">Q2 (4.5 ha)</option><option value="4.5">Q3 (4.5 ha)</option><option value="4.5">Q4 (4.5 ha)</option><option value="7">Block B (7 ha)</option><option value="25">Both (25 ha)</option></select></div>
+        </div>
+        <div class="gr gr2">
+          <div class="fg"><label>Planned date</label><input type="date" id="p-date"></div>
+          <div class="fg"><label>Notes</label><input type="text" id="p-notes" placeholder="e.g. Wk25 preventative"></div>
+        </div>
+        <button class="btn btnp btns" onclick="addPlan()" style="padding:7px 16px">Add to plan</button>
+      </div>
+      <div id="p-list"></div>
+      <div id="p-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div id="tasks" class="section">
+  <div class="card">
+    <h3>Add task</h3>
+    <div class="gr gr2">
+      <div class="fg"><label>Task</label><input type="text" id="tk-text" placeholder="e.g. Check pivot nozzles"></div>
+      <div class="fg"><label>Due date</label><input type="date" id="tk-due"></div>
+    </div>
+    <div class="gr gr2">
+      <div class="fg"><label>Block</label><select id="tk-block"><option>Both blocks</option><option>Block A — Centre Pivot</option><option>Block A — Q1</option><option>Block A — Q2</option><option>Block A — Q3</option><option>Block A — Q4</option><option>Block B — Overhead</option><option>General</option></select></div>
+      <div class="fg"><label>Priority</label><select id="tk-pri"><option>Normal</option><option>High</option><option>Low</option></select></div>
+    </div>
+    <button class="btn btnp" onclick="addTask()">Add task</button>
+  </div>
+  <div class="card">
+    <h3>Task list</h3>
+    <div class="empty" id="tk-empty">No tasks yet.</div>
+    <div id="tk-list"></div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div id="reports" class="section">
+  <div class="card">
+    <h3>Generate spray record report</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:12px">Select records, fill in grower details, then generate a PDF spray record sheet in the FCS format.</p>
+    <div class="gr gr3">
+      <div class="fg"><label>Grower name</label><input type="text" id="r-grower" value="Midland Acres"></div>
+      <div class="fg"><label>Farm</label><input type="text" id="r-farm" value="Midland Acres"></div>
+      <div class="fg"><label>Field ref</label><select id="r-field"><option>Block A — Centre Pivot</option><option>Block A — Q1</option><option>Block A — Q2</option><option>Block A — Q3</option><option>Block A — Q4</option><option>Block B — Overhead</option><option>Both blocks</option></select></div>
+    </div>
+    <div class="gr gr4">
+      <div class="fg"><label>Crop</label><input type="text" id="r-crop" value="Paprika"></div>
+      <div class="fg"><label>Variety</label><input type="text" id="r-variety" value="Papri King"></div>
+      <div class="fg"><label>Season from</label><input type="date" id="r-from"></div>
+      <div class="fg"><label>Season to</label><input type="date" id="r-to"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600">Select records to include</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btns" onclick="selAll(true)">All</button>
+          <button class="btn btns" onclick="selAll(false)">None</button>
+        </div>
+      </div>
+      <div id="r-list" style="max-height:260px;overflow-y:auto;border:1px solid #e5e5e0;border-radius:8px;padding:0 12px">
+        <div class="empty">No spray records yet.</div>
+      </div>
+    </div>
+    <button class="btn btnp" id="r-btn" onclick="genReport()">Generate PDF report</button>
+    <div id="r-status" style="font-size:12px;color:#666;margin-top:8px"></div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<script>
+// ============================================================
+// DATA STORAGE — localStorage for cross-device persistence
+// ============================================================
+const KEYS = {irr:'ma_irr',entries:'ma_entries',tasks:'ma_tasks',cal:'ma_cal',qacts:'ma_qacts',chems:'ma_chems',plans:'ma_plans'};
+let D = {irr:[],entries:[],tasks:[],cal:{A:{},B:{}},qacts:[],chems:[],plans:[]};
+
+function load(){
+  Object.keys(KEYS).forEach(k=>{
+    try{const r=localStorage.getItem(KEYS[k]);if(r)D[k]=JSON.parse(r);}catch(e){}
+  });
+}
+function save(k){try{localStorage.setItem(KEYS[k],JSON.stringify(D[k]));}catch(e){}}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmt(n){return typeof n==='number'?+(n.toFixed(4)):n;}
+
+// ============================================================
+// CALENDAR DATA
+// ============================================================
+const CAL_ROWS=[
+  {t:'h',l:'🟠 Fungicide programme'},
+  {t:'r',cat:'FUN',p:'Azoxystrobin+Difenoconazole (11+3)',r:'0.5 l/ha',s:[1,0,0,0,0,0,0,0,1],phi:'14d',pw:true,n:'Cercospora, PM & Anthracnose. PHI 14.'},
+  {t:'r',cat:'FUN',p:'Pyraclostrobin+Boscalid (11+7)',r:'500 g/ha',s:[0,1,0,0,1,1,0,0,0],phi:'7d',n:'PHI 7. Rotate groups.'},
+  {t:'r',cat:'FUN',p:'Tebuconazole (Group 3)',r:'500 ml/ha',s:[1,0,0,0,0,0,0,0,0],phi:'7d',n:'PHI 7.'},
+  {t:'r',cat:'FUN',p:'Sulphur — Preventative',r:'25 kg/ha',s:[1,1,1,1,1,0,1,1,1],phi:'PHI 0',n:'Safe to picking day. Cool conditions only.'},
+  {t:'r',cat:'FUN',p:'Copper / Cuperdem',r:'1.5l/250ml',s:[0,1,0,1,0,1,1,0,1],phi:'7d',n:'Protectant. PHI 7.'},
+  {t:'h',l:'🔴 Pesticide / insecticide programme'},
+  {t:'r',cat:'PES',p:'Karate/Lambda or Delta/Decis',r:'1.7 l/ha',s:[1,0,0,0,0,0,0,0,0],phi:'5d',pw:true,n:'PHI 5 — Wk23 only.'},
+  {t:'r',cat:'PES',p:'Spinotoram (Group 5)',r:'12g/100L',s:[1,1,0,0,0,0,0,0,0],phi:'—',n:'Thrips, Bollworm.'},
+  {t:'r',cat:'PES',p:'Emmamectin (Group 6)',r:'300 g/ha',s:[1,1,0,0,1,0,0,0,0],phi:'7d',n:'Worm & FCM.'},
+  {t:'r',cat:'PES',p:'Lufenuron (Group 15)',r:'100 g/ha',s:[0,1,1,0,0,0,0,0,0],phi:'3d',n:'IGR. PHI 3.'},
+  {t:'r',cat:'PES',p:'Chlorantraniliprole (Group 28)',r:'150 ml/ha',s:[1,0,1,1,0,1,0,1,0],phi:'3d',n:'PHI 3 — harvest period.'},
+  {t:'r',cat:'PES',p:'FCM — Last Call (5-wk interval)',r:'1 tube/ha',s:[0,1,0,0,0,1,0,0,0],phi:'PHI 0',n:'CRITICAL: 5-week intervals.'},
+  {t:'r',cat:'PES',p:'Methoxyfenozide (Group 18)',r:'0.5 l/ha',s:[1,0,1,0,0,0,0,0,0],phi:'3d',n:'Rotate Groups 6 & 28.'},
+  {t:'r',cat:'PES',p:'Fipronil / Friponil',r:'500 ml/ha',s:[1,1,0,0,0,0,0,0,0],phi:'7d',n:'Only if pressure observed.'},
+  {t:'h',l:'🌶 Harvest schedule'},
+  {t:'r',cat:'HAR',p:'1st Pick (60–70% red)',r:'Manual',s:[0,0,1,1,0,0,0,0,0],phi:'—',n:'Grade A/B/cull on-field.'},
+  {t:'r',cat:'HAR',p:'2nd Pick — Main yield',r:'Manual',s:[0,0,0,0,1,1,0,0,0],phi:'—',n:'Record yield per ha.'},
+  {t:'r',cat:'HAR',p:'Final / Strip pick',r:'Strip',s:[0,0,0,0,0,0,1,1,0],phi:'—',n:'Post-harvest work after.'},
+  {t:'r',cat:'HAR',p:'Drying & Grading (≤12%)',r:'Solar dry',s:[0,0,1,1,1,1,1,1,1],phi:'—',n:'Grade A/B/C. Raised racks.'},
+  {t:'h',l:'📋 Monitoring & tasks'},
+  {t:'r',cat:'MON',p:'Pest scouting',r:'Weekly',s:[1,1,1,1,1,1,1,1,1],phi:'—',n:'Log in field book.'},
+  {t:'r',cat:'MON',p:'Disease scouting',r:'Weekly',s:[1,1,1,1,1,1,1,1,1],phi:'—',n:'Check lower canopy first.'},
+  {t:'r',cat:'MON',p:'Irrigation check',r:'2x/week',s:[1,1,1,1,1,1,1,1,1],phi:'—',n:'Avoid wet feet.'},
+  {t:'r',cat:'MON',p:'Yield recording & labour',r:'End wk',s:[0,0,1,1,1,1,1,1,1],phi:'—',n:'Confirm labour for pick days.'},
+];
+const CAT_B_MAP={FUN:'b-blue',PES:'b-red',HAR:'b-amb',MON:'b-grn'};
+
+// ============================================================
+// INVENTORY CONSTANTS
+// ============================================================
+const CATS=['fungicide','pesticide','herbicide','foliar','granular','fertiliser','wetter','buffer'];
+const CAT_L={fungicide:'Fungicide',pesticide:'Pesticide / Insecticide',herbicide:'Herbicide',foliar:'Foliar spray (liquid)',granular:'Granular fertiliser (spraying)',fertiliser:'Fertiliser',wetter:'Wetter',buffer:'Buffer'};
+const INV_B={fungicide:'b-blue',pesticide:'b-red',herbicide:'b-grn',foliar:'b-teal',granular:'b-amb',fertiliser:'b-pur',wetter:'b-gry',buffer:'b-gry'};
+const METH_L={boom:'Boom spray (200 L/ha)',knap:'Knapsacks (200 L/ha)',pivot:'Pivot spray line (600 L/ha, 2× chem)'};
+const WATER_VOL={boom:200,knap:200,pivot:600};
+
+function rateFor(item,m){
+  if(m==='pivot')return parseFloat(item.pivot)||((parseFloat(item.boom)||0)*2);
+  if(m==='knap')return parseFloat(item.knap)||parseFloat(item.boom)||0;
+  return parseFloat(item.boom)||0;
+}
+
+// ============================================================
+// HARVEST DATE HELPERS
+// ============================================================
+function safeHarv(dateStr,phi){
+  if(!dateStr||phi===null||phi===undefined||isNaN(parseInt(phi)))return null;
+  const d=new Date(dateStr);d.setDate(d.getDate()+parseInt(phi));return d;
+}
+function fmtDate(d){if(!d)return '—';return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+function daysUntil(d){if(!d)return null;const now=new Date();now.setHours(0,0,0,0);return Math.round((d-now)/(86400000));}
+
+function renderHarvest(){
+  const results=[];
+  const blockMap={};
+  D.entries.filter(e=>e.type==='spray').forEach(e=>{
+    if(!blockMap[e.block])blockMap[e.block]=[];blockMap[e.block].push(e);
+  });
+  Object.keys(blockMap).forEach(block=>{
+    let latest=null,lp='',ld='';
+    blockMap[block].forEach(s=>{const phi=parseInt(s.phi);if(isNaN(phi))return;const sd=safeHarv(s.date,phi);if(!latest||sd>latest){latest=sd;lp=s.tradename;ld=s.date;}});
+    if(latest)results.push({label:block,safe:latest,prod:lp,date:ld});
+  });
+  const qMap={};
+  D.qacts.filter(a=>a.type==='spray').forEach(a=>{if(!qMap[a.quarter])qMap[a.quarter]=[];qMap[a.quarter].push(a);});
+  Object.keys(qMap).forEach(q=>{
+    let latest=null,lp='',ld='';
+    qMap[q].forEach(s=>{const phi=parseInt(s.phi);if(isNaN(phi))return;const sd=safeHarv(s.date,phi);if(!latest||sd>latest){latest=sd;lp=s.tradename;ld=s.date;}});
+    if(latest)results.push({label:'Block A — '+q,safe:latest,prod:lp,date:ld});
+  });
+  const panel=document.getElementById('harvest-panel');
+  if(!results.length){panel.innerHTML='<div class="empty">Log spray records with PHI to see safe harvest dates.</div>';return;}
+  panel.innerHTML=results.map(r=>{
+    const days=daysUntil(r.safe);
+    let cls='safe-yes',msg='Safe now';
+    if(days>7){cls='safe-no';msg=days+' days to go';}
+    else if(days>0){cls='safe-soon';msg='In '+days+' day'+(days===1?'':'s');}
+    else{msg='Safe since '+Math.abs(days)+' day'+(days===0?'':'s')+' ago';}
+    return `<div class="hcard"><div class="ht">${r.label}</div><div class="hd ${cls}">${fmtDate(r.safe)}</div><div class="hs ${cls}">${msg}</div><div class="hp">Last: ${r.prod} on ${r.date}</div></div>`;
+  }).join('');
+}
+
+// ============================================================
+// PIVOT QUARTERS
+// ============================================================
+let selQuarter='Q1';
+const Q_COLS={Q1:'#1557b0',Q2:'#1e7e34',Q3:'#8a6100',Q4:'#5b2d8e'};
+
+function selQ(q){
+  selQuarter=q;
+  ['Q1','Q2','Q3','Q4'].forEach(x=>{const el=document.getElementById('sv-'+x);if(el)el.style.opacity=x===q?'1':'0.55';});
+  document.getElementById('q-form-title').textContent='Log activity for '+q+' (~4.5 ha)';
+  document.getElementById('q-form').style.display='block';
+  document.getElementById('q-date').value=today();
+  document.getElementById('q-type').value='irrigation';
+  qTypeChange();
+  renderQCards();renderQHist(q);
+}
+
+function renderQCards(){
+  const wrap=document.getElementById('q-cards');
+  wrap.innerHTML=['Q1','Q2','Q3','Q4'].map(q=>{
+    const acts=D.qacts.filter(a=>a.quarter===q);
+    const lastS=acts.filter(a=>a.type==='spray').sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const lastI=acts.filter(a=>a.type==='irrigation').sort((a,b)=>b.date.localeCompare(a.date))[0];
+    let safeHtml='<span style="color:#999;font-size:11px">No sprays logged</span>';
+    if(lastS){const phi=parseInt(lastS.phi);if(!isNaN(phi)){const sd=safeHarv(lastS.date,phi);const days=daysUntil(sd);safeHtml=days>0?`<span style="color:#8a6100;font-size:11px">Safe: ${fmtDate(sd)} (${days}d)</span>`:`<span style="color:#1e7e34;font-size:11px">Safe now — ${fmtDate(sd)}</span>`;}}
+    const irrHtml=lastI?`<div style="font-size:11px;color:#999">Last irr: ${lastI.date}${lastI.mm?' · '+lastI.mm+'mm':''}</div>`:'<div style="font-size:11px;color:#bbb">No irrigation logged</div>';
+    return `<div class="q-card${selQuarter===q?' sel':''}" onclick="selQ('${q}')" style="border-left-color:${Q_COLS[q]}"><div class="q-name" style="color:${Q_COLS[q]}">${q} <span style="font-weight:400;font-size:11px;color:#666">~4.5 ha</span></div><div style="margin-top:3px">${safeHtml}</div>${irrHtml}</div>`;
+  }).join('');
+}
+
+function qTypeChange(){
+  const t=document.getElementById('q-type').value;
+  document.getElementById('q-irr-f').style.display=t==='irrigation'?'block':'none';
+  document.getElementById('q-spray-f').style.display=t==='spray'?'block':'none';
+  document.getElementById('q-fert-f').style.display=t==='fert'?'block':'none';
+}
+function qAutoFill(){
+  const v=document.getElementById('q-prod').value;if(!v||v==='other')return;
+  const p=v.split('|');
+  if(p[1])document.getElementById('q-active').value=p[1];
+  if(p[2])document.getElementById('q-rate').value=p[2];
+  if(p[3])document.getElementById('q-phi').value=p[3];
+}
+function saveQ(){
+  const type=document.getElementById('q-type').value;
+  const date=document.getElementById('q-date').value||today();
+  const act={id:Date.now(),quarter:selQuarter,type,date};
+  if(type==='irrigation'){act.duration=document.getElementById('q-dur').value;act.mm=document.getElementById('q-mm').value;act.notes=document.getElementById('q-notes').value;}
+  else if(type==='spray'){const sel=document.getElementById('q-prod').value;act.tradename=sel.split('|')[0];act.active=document.getElementById('q-active').value;act.rate=document.getElementById('q-rate').value;act.phi=document.getElementById('q-phi').value;act.operator=document.getElementById('q-op').value;if(!act.tradename){alert('Select a product.');return;}}
+  else{act.fertName=document.getElementById('q-fname').value;act.rate=document.getElementById('q-frate').value;if(!act.fertName){alert('Enter fertiliser name.');return;}}
+  D.qacts.unshift(act);save('qacts');
+  document.getElementById('q-dur').value='';document.getElementById('q-mm').value='';document.getElementById('q-notes').value='';
+  document.getElementById('q-prod').value='';document.getElementById('q-active').value='';document.getElementById('q-rate').value='';document.getElementById('q-phi').value='';document.getElementById('q-op').value='';
+  document.getElementById('q-fname').value='';document.getElementById('q-frate').value='';
+  renderQCards();renderQHist(selQuarter);renderAll();
+}
+function renderQHist(q){
+  const wrap=document.getElementById('q-history');wrap.style.display='block';
+  document.getElementById('q-hist-title').textContent=q+' — activity history';
+  const acts=D.qacts.filter(a=>a.quarter===q).sort((a,b)=>b.date.localeCompare(a.date));
+  const body=document.getElementById('q-hist-body');const empty=document.getElementById('q-hist-empty');
+  const tbl=document.getElementById('q-hist-tbl');
+  body.innerHTML='';
+  if(!acts.length){empty.style.display='';tbl.style.display='none';return;}
+  empty.style.display='none';tbl.style.display='';
+  acts.forEach(a=>{
+    const tr=document.createElement('tr');
+    let detail='',phi='—',safe='—';
+    if(a.type==='irrigation'){detail=(a.mm?a.mm+' mm':'')+(a.duration?' · '+a.duration+' hrs':'');}
+    else if(a.type==='spray'){detail=a.tradename+(a.active?' — '+a.active:'');phi=a.phi||'—';const phiN=parseInt(a.phi);if(!isNaN(phiN)){const sd=safeHarv(a.date,phiN);safe=fmtDate(sd);}}
+    else{detail=a.fertName||'';}
+    const pill=a.type==='irrigation'?'<span class="type-pill pill-i">IRR</span>':a.type==='spray'?'<span class="type-pill pill-s">SPRAY</span>':'<span class="type-pill pill-f">FERT</span>';
+    tr.innerHTML=`<td>${a.date}</td><td>${pill}</td><td style="font-size:11px">${detail}</td><td>${a.rate||'—'}</td><td>${a.mm?a.mm+'mm':a.duration?a.duration+'h':'—'}</td><td>${phi}</td><td style="font-size:11px;color:#1e7e34">${safe}</td><td>${a.operator||'—'}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+function renderCalendar(blk){
+  const tbody=document.getElementById('cal-body-'+blk);tbody.innerHTML='';
+  CAL_ROWS.forEach((row,ri)=>{
+    const tr=document.createElement('tr');
+    if(row.t==='h'){tr.className='shdr';tr.innerHTML=`<td colspan="13">${row.l}</td>`;return tbody.appendChild(tr);}
+    const badge=CAT_B_MAP[row.cat]?`<span class="badge ${CAT_B_MAP[row.cat]}" style="font-size:9px">${row.cat}</span> `:'';
+    const phi=row.pw?`<span class="phi-warn">${row.phi}</span>`:`<span style="font-size:10px;color:#666">${row.phi||'—'}</span>`;
+    let cells='';
+    for(let wi=0;wi<9;wi++){
+      const k=blk+'_'+ri+'_'+wi;const isSug=row.s&&row.s[wi];
+      const st=D.cal[blk][k]||(isSug?'suggested':null);
+      cells+=`<td style="text-align:center"><span class="dot${st?' '+st:''}" onclick="cycleDot('${blk}',${ri},${wi})"></span></td>`;
+    }
+    tr.innerHTML=`<td style="font-size:11px">${badge}${row.p}</td><td style="font-size:10px;color:#888">${row.r||''}</td>${cells}<td>${phi}</td><td style="font-size:10px;color:#777;line-height:1.4">${row.n||''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function cycleDot(blk,ri,wi){
+  const k=blk+'_'+ri+'_'+wi;const isSug=CAL_ROWS[ri].s&&CAL_ROWS[ri].s[wi];
+  const cur=D.cal[blk][k];let next;
+  if(!cur)next='planned';
+  else if(cur==='suggested')next='planned';
+  else if(cur==='planned')next='done';
+  else if(cur==='done')next='skip';
+  else next=isSug?'suggested':null;
+  if(next===null)delete D.cal[blk][k];else D.cal[blk][k]=next;
+  save('cal');renderCalendar(blk);
+}
+function showBlk(b,btn){
+  document.querySelectorAll('.btab').forEach(x=>x.classList.remove('on'));btn.classList.add('on');
+  const cals=document.querySelectorAll('.cal-wrap');
+  cals[0].style.display=b==='A'?'':'none';cals[1].style.display=b==='B'?'':'none';
+}
+
+// ============================================================
+// SPRAY & FERT LOG
+// ============================================================
+function setT(t){
+  document.getElementById('e-type').value=t;
+  document.getElementById('t-spray').className=t==='spray'?'btn btnp btns':'btn btns';
+  document.getElementById('t-fert').className=t==='fert'?'btn btnp btns':'btn btns';
+  document.getElementById('spray-fields').style.display=t==='spray'?'block':'none';
+  document.getElementById('fert-fields').style.display=t==='fert'?'block':'none';
+}
+function eBlockChange(){
+  const sel=document.getElementById('e-block');
+  const ha=sel.options[sel.selectedIndex].dataset.ha;
+  if(ha){document.getElementById('e-ha').value=ha;eCalcQty();}
+}
+function eCatChange(){
+  const cat=document.getElementById('e-cat').value;
+  const prod=document.getElementById('e-prod');
+  prod.innerHTML='<option value="">— select —</option>';
+  const items=D.chems.filter(c=>!cat||c.cat===cat);
+  items.forEach(c=>{
+    const stock=c.stock?` [${c.stock} ${c.unit}]`:'';
+    const opt=document.createElement('option');
+    opt.value=c.id;
+    opt.textContent=`${c.name} — ${c.active||''}${stock}`;
+    prod.appendChild(opt);
+  });
+  if(!items.length){prod.innerHTML='<option value="">No chemicals in this category</option>';}
+  // reset fields
+  document.getElementById('e-active').value='';
+  document.getElementById('e-balance').value='';
+  document.getElementById('e-rate').value='';
+  document.getElementById('e-phi').value='';
+  document.getElementById('e-qty').value='';
+}
+function eAutoFill(){
+  const id=parseInt(document.getElementById('e-prod').value);
+  if(!id)return;
+  const item=D.chems.find(c=>c.id===id);
+  if(!item)return;
+  document.getElementById('e-active').value=item.active||'';
+  document.getElementById('e-balance').value=item.stock?`${item.stock} ${item.unit}`:'Not set';
+  document.getElementById('e-phi').value=item.phi||'';
+  // Set rate from boom rate
+  if(item.boom){document.getElementById('e-rate').value=`${item.boom} ${item.unit}/ha`;}
+  eCalcQty();
+}
+function eCalcQty(){
+  const rateStr=document.getElementById('e-rate').value;
+  const ha=parseFloat(document.getElementById('e-ha').value);
+  if(!rateStr||isNaN(ha)||ha<=0){document.getElementById('e-qty').value='';return;}
+  const rateNum=parseFloat(rateStr);
+  if(isNaN(rateNum)){document.getElementById('e-qty').value='';return;}
+  const total=Math.round(rateNum*ha*1000)/1000;
+  // Get unit from inventory item
+  const id=parseInt(document.getElementById('e-prod').value);
+  const item=D.chems.find(c=>c.id===id);
+  const unit=item?item.unit:'';
+  document.getElementById('e-qty').value=`${total} ${unit}`;
+}
+function getSafeDate(e){const phi=parseInt(e.phi);if(isNaN(phi))return '—';return fmtDate(safeHarv(e.date,phi));}
+function saveEntry(){
+  const type=document.getElementById('e-type').value;
+  const date=document.getElementById('e-date').value||today();
+  const block=document.getElementById('e-block').value;
+  let tradename='',active='';
+  if(type==='fert'){tradename=document.getElementById('e-fname').value;active=document.getElementById('e-fnutrient').value;if(!tradename){alert('Enter fertiliser name.');return;}}
+  else{
+    const id=parseInt(document.getElementById('e-prod').value);
+    const item=D.chems.find(c=>c.id===id);
+    tradename=item?item.name:document.getElementById('e-prod').value;
+    active=document.getElementById('e-active').value;
+    if(!tradename){alert('Select a product.');return;}
+  }
+  D.entries.unshift({id:Date.now(),type,date,block,tradename,active,rate:document.getElementById('e-rate').value,ha:document.getElementById('e-ha').value,phi:document.getElementById('e-phi').value,qty:document.getElementById('e-qty').value,method:document.getElementById('e-method').value,operator:document.getElementById('e-op').value,notes:document.getElementById('e-notes').value});
+  save('entries');
+  ['e-prod','e-active','e-rate','e-ha','e-phi','e-qty','e-fname','e-fnutrient','e-notes','e-op','e-balance'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('e-cat').value='';
+  eCatChange();
+  renderAll();renderLog();
+}
+function renderLog(){
+  const fb=document.getElementById('f-block').value;
+  const ft=document.getElementById('f-type').value;
+  const filtered=D.entries.filter(e=>{if(fb&&!e.block.includes(fb))return false;if(ft&&e.type!==ft)return false;return true;});
+  const body=document.getElementById('e-body');body.innerHTML='';
+  filtered.forEach(e=>{
+    const tr=document.createElement('tr');
+    const pill=e.type==='fert'?'<span class="type-pill pill-f">FERT</span>':'<span class="type-pill pill-s">SPRAY</span>';
+    tr.innerHTML=`<td>${e.date}</td><td>${pill}</td><td style="font-size:11px">${e.block}</td><td style="font-weight:600">${e.tradename}</td><td style="font-size:11px">${e.active||'—'}</td><td>${e.rate||'—'}</td><td>${e.ha||'—'}</td><td>${e.qty||'—'}</td><td>${e.phi||'—'}</td><td style="font-size:11px;color:#1e7e34">${getSafeDate(e)}</td><td style="font-size:11px">${e.method||'—'}</td><td>${e.operator||'—'}</td>`;
+    body.appendChild(tr);
+  });
+  document.getElementById('e-tbl').style.display=filtered.length?'':'none';
+  document.getElementById('e-empty').style.display=filtered.length?'none':'';
+  renderReportList();
+}
+
+// ============================================================
+// IRRIGATION
+// ============================================================
+function saveIrr(){
+  const dur=document.getElementById('i-dur').value,mm=document.getElementById('i-mm').value;
+  if(!dur&&!mm){alert('Enter duration or mm applied.');return;}
+  D.irr.unshift({id:Date.now(),date:document.getElementById('i-date').value||today(),block:document.getElementById('i-block').value,duration:dur,mm:mm,method:document.getElementById('i-method').value,notes:document.getElementById('i-notes').value});
+  save('irr');['i-dur','i-mm','i-notes'].forEach(id=>document.getElementById(id).value='');renderAll();
+}
+
+// ============================================================
+// CHEMICAL INVENTORY
+// ============================================================
+function invTab(id,btn){
+  ['inv-list','inv-calc','inv-add','inv-alerts'].forEach(x=>{const el=document.getElementById(x);if(el)el.style.display=x===id?'block':'none';});
+  document.querySelectorAll('#inventory .btab').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  if(id==='inv-calc')renderCalcPills();
+  if(id==='inv-alerts'){renderPlanChem();renderStockAlerts();}
+}
+function renderInv(){
+  const lo=D.chems.filter(c=>{const s=parseFloat(c.stock),m=parseFloat(c.min);return !isNaN(m)&&!isNaN(s)&&s<=m;});
+  document.getElementById('inv-low-ban').innerHTML=lo.length?`<div class="alert-box"><strong>⚠ ${lo.length} item${lo.length>1?'s':''} at or below minimum</strong><ul style="padding-left:16px;margin-top:4px">${lo.map(i=>`<li>${i.name} — ${i.stock} ${i.unit} (min: ${i.min})</li>`).join('')}</ul></div>`:'';
+  const body=document.getElementById('inv-body');
+  if(!D.chems.length){body.innerHTML='<div class="empty">No chemicals yet — use Add / Edit to get started.</div>';return;}
+  let h='';
+  CATS.forEach(cat=>{
+    const items=D.chems.filter(c=>c.cat===cat);if(!items.length)return;
+    h+=`<div class="chdr"><span class="badge ${INV_B[cat]}">${CAT_L[cat]}</span></div>`;
+    h+=`<div style="overflow-x:auto;margin-bottom:6px"><table class="tbl"><thead><tr><th>Trade name</th><th>Active / analysis</th><th>PHI</th><th>Boom rate</th><th>Knapsack rate</th><th>Pivot rate</th><th>Stock</th><th>Min</th><th>Supplier</th><th></th></tr></thead><tbody>`;
+    items.forEach(item=>{
+      const s=parseFloat(item.stock)||0,m=parseFloat(item.min);
+      let sc='bar-ok',tc='tag-ok',tl='OK';
+      if(!isNaN(m)&&s<=m){sc='bar-crit';tc='tag-crit';tl='LOW';}
+      else if(!isNaN(m)&&s<=m*1.5){sc='bar-low';tc='tag-low';tl='Low';}
+      const pct=(!isNaN(m)&&m>0)?Math.min(100,Math.round(s/(m*2)*100)):65;
+      const isWB=item.cat==='wetter'||item.cat==='buffer';
+      const bR=isWB?(item.wrate?`${item.wrate} ${item.wunit||'ml'}/100L`:'—'):(item.boom?`${item.boom} ${item.unit}/ha`:'—');
+      const kR=isWB?'—':(item.knap?`${item.knap} ${item.unit}/ha`:item.boom?`${item.boom} ${item.unit}/ha`:'—');
+      const pvRaw=item.pivot||(item.boom?fmt(parseFloat(item.boom)*2):'');
+      const pvR=isWB?'—':(pvRaw?`${pvRaw} ${item.unit}/ha`:'—');
+      h+=`<tr><td style="font-weight:600">${item.name}${item.notes?`<div style="font-size:10px;color:#999">${item.notes}</div>`:''}</td><td style="font-size:11px;color:#666">${item.active||'—'}</td><td>${item.phi!==''&&item.phi!==undefined?`<span style="font-size:11px">${item.phi}d</span>`:'—'}</td><td style="font-size:11px">${bR}</td><td style="font-size:11px">${kR}</td><td style="font-size:11px">${pvR}</td><td><div style="display:flex;align-items:center;gap:5px"><span style="font-weight:600">${s} ${item.unit}</span><span class="${tc}">${tl}</span></div><div class="bar-wrap"><div class="bar ${sc}" style="width:${pct}%"></div></div></td><td style="font-size:11px">${!isNaN(m)?m+' '+item.unit:'—'}</td><td style="font-size:11px">${item.supplier||'—'}</td><td style="white-space:nowrap"><button class="btn btns" onclick="fEdit(${item.id})">Edit</button> <button class="btn btns" onclick="adjStock(${item.id})">Stock+</button></td></tr>`;
+    });
+    h+=`</tbody></table></div>`;
+  });
+  body.innerHTML=h;
+}
+function adjStock(id){
+  const item=D.chems.find(c=>c.id===id);if(!item)return;
+  const v=prompt(`Update stock for ${item.name}\nCurrent: ${item.stock} ${item.unit}\nEnter new total:`);
+  if(v===null)return;const n=parseFloat(v);if(isNaN(n)){alert('Enter a number.');return;}
+  item.stock=n;save('chems');renderInv();renderCalcPills();
+}
+
+// Calculator
+function renderCalcPills(){
+  const sp=D.chems.filter(c=>!['wetter','buffer','fertiliser'].includes(c.cat));
+  const wt=D.chems.filter(c=>c.cat==='wetter');const bf=D.chems.filter(c=>c.cat==='buffer');
+  const ws=document.getElementById('cc-wet-sel');ws.innerHTML='<option value="">— select —</option>';wt.forEach(w=>ws.innerHTML+=`<option value="${w.id}">${w.name}</option>`);
+  const bs=document.getElementById('cc-buf-sel');bs.innerHTML='<option value="">— select —</option>';bf.forEach(b=>bs.innerHTML+=`<option value="${b.id}">${b.name}</option>`);
+  const wrap=document.getElementById('cc-pills');
+  if(!sp.length){wrap.innerHTML='<div class="empty" style="padding:0.5rem;font-size:12px">No sprayable chemicals in inventory.</div>';return;}
+  let h='';
+  CATS.filter(c=>!['wetter','buffer','fertiliser'].includes(c)).forEach(cat=>{
+    const items=sp.filter(c=>c.cat===cat);if(!items.length)return;
+    h+=`<div style="width:100%;font-size:11px;color:#666;font-weight:600;margin-top:4px">${CAT_L[cat]}</div>`;
+    items.forEach(item=>{h+=`<label style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;border:1px solid #ddd;cursor:pointer;font-size:12px;background:white"><input type="checkbox" data-id="${item.id}" onchange="calcUpd()" style="width:13px;height:13px">${item.name}</label>`;});
+  });
+  wrap.innerHTML=h;
+}
+function calcUpd(){
+  const m=document.getElementById('cc-meth').value;
+  const fv=document.getElementById('cc-field').value;
+  document.getElementById('cc-custom-row').style.display=fv==='custom'?'grid':'none';
+  const ha=fv==='custom'?(parseFloat(document.getElementById('cc-ha').value)||0):parseFloat(fv)||0;
+  const sel=Array.from(document.querySelectorAll('[data-id]:checked')).map(x=>parseInt(x.dataset.id));
+  const uw=document.getElementById('cc-wet').checked,ub=document.getElementById('cc-buf').checked;
+  const wid=parseInt(document.getElementById('cc-wet-sel').value),bid=parseInt(document.getElementById('cc-buf-sel').value);
+  if(!sel.length&&!uw&&!ub){document.getElementById('cc-out').style.display='none';return;}
+  if(!ha){document.getElementById('cc-out').style.display='none';return;}
+  const wt=WATER_VOL[m]*ha;let rows=[],warns=[];
+  sel.forEach(id=>{
+    const item=D.chems.find(c=>c.id===id);if(!item)return;
+    const r=rateFor(item,m);if(!r){warns.push(`${item.name} — no rate set for ${METH_L[m]}`);return;}
+    const qty=fmt(r*ha);const st=parseFloat(item.stock)||0;const ok=st>=qty;
+    if(!ok)warns.push(`${item.name}: need ${qty} ${item.unit}, have ${st} ${item.unit}`);
+    rows.push({name:item.name,detail:`${r} ${item.unit}/ha × ${ha} ha`,qty,unit:item.unit,st,ok});
+  });
+  if(uw&&wid){const w=D.chems.find(c=>c.id===wid);if(w&&w.wrate){const wq=fmt((wt/100)*parseFloat(w.wrate));rows.push({name:w.name+' (wetter)',detail:`${w.wrate} ${w.wunit||'ml'}/100L × ${wt}L`,qty:wq,unit:w.wunit||'ml',st:parseFloat(w.stock)||0,ok:true});}}
+  if(ub&&bid){const b=D.chems.find(c=>c.id===bid);if(b){const br=parseFloat(b.wrate)||parseFloat(b.boom)||0;const bq=fmt(br*ha);rows.push({name:b.name+' (buffer)',detail:`${br} ${b.wunit||b.unit||'ml'}/ha`,qty:bq,unit:b.wunit||b.unit||'ml',st:parseFloat(b.stock)||0,ok:true});}}
+  document.getElementById('cc-rows').innerHTML=rows.map(r=>`<div class="collect-row"><div><div style="font-size:14px;font-weight:600">${r.name}</div><div class="csub">${r.detail} · ${METH_L[m]}</div></div><div style="text-align:right"><span class="cqty">${r.qty}</span> <span style="font-size:12px;color:#777">${r.unit}</span><div style="font-size:11px;color:${r.ok?'#1e7e34':'#c0392b'};font-weight:600">${r.ok?'✓ In stock':'⚠ Short'} — have ${r.st} ${r.unit}</div></div></div>`).join('');
+  document.getElementById('cc-warn').innerHTML=warns.length?`<div class="warn-box">⚠ Stock warning<ul style="padding-left:16px;margin-top:3px">${warns.map(w=>`<li>${w}</li>`).join('')}</ul></div>`:'';
+  document.getElementById('cc-out').style.display='block';
+}
+
+// Add/Edit
+function fAutoPivot(){const b=parseFloat(document.getElementById('f-boom').value);const pf=document.getElementById('f-pivot');if(!isNaN(b)&&b>0&&!pf.value)pf.value=fmt(b*2);}
+function fToggleWet(){const c=document.getElementById('f-cat').value;document.getElementById('f-wet-row').style.display=(c==='wetter'||c==='buffer')?'block':'none';}
+function fSave(){
+  const id=parseInt(document.getElementById('f-id').value)||Date.now();
+  const item={id,cat:document.getElementById('f-cat').value,name:document.getElementById('f-name').value.trim(),active:document.getElementById('f-active').value,supplier:document.getElementById('f-supplier').value,phi:document.getElementById('f-phi').value,unit:document.getElementById('f-unit').value,stock:document.getElementById('f-stock').value,boom:document.getElementById('f-boom').value,knap:document.getElementById('f-knap').value,pivot:document.getElementById('f-pivot').value,wrate:document.getElementById('f-wrate').value,wunit:document.getElementById('f-wunit').value,min:document.getElementById('f-min').value,notes:document.getElementById('f-notes').value};
+  if(!item.name){alert('Enter a trade name.');return;}
+  const idx=D.chems.findIndex(c=>c.id===id);if(idx>-1)D.chems[idx]=item;else D.chems.push(item);
+  save('chems');fClear();renderInv();renderCalcPills();renderEditList();renderPlanChem();
+  const m=document.getElementById('f-msg');m.textContent='Saved ✓';setTimeout(()=>m.textContent='',2000);
+}
+function fClear(){
+  ['f-id','f-name','f-active','f-supplier','f-phi','f-stock','f-boom','f-knap','f-pivot','f-wrate','f-min','f-notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-cat').value='fungicide';document.getElementById('f-unit').value='L';
+  document.getElementById('inv-form-title').textContent='Add chemical to inventory';
+  document.getElementById('f-del').style.display='none';document.getElementById('f-wet-row').style.display='none';
+}
+function fEdit(id){
+  const item=D.chems.find(c=>c.id===id);if(!item)return;
+  invTab('inv-add',document.querySelectorAll('#inventory .btab')[2]);
+  const map={fid:'id',fcat:'cat',fname:'name','f-active':'active','f-supplier':'supplier',fphi:'phi',funit:'unit','f-stock':'stock','f-boom':'boom','f-knap':'knap','f-pivot':'pivot','f-wrate':'wrate','f-wunit':'wunit','f-min':'min','f-notes':'notes'};
+  Object.entries({fid:'id','f-cat':'cat','f-name':'name','f-active':'active','f-supplier':'supplier','f-phi':'phi','f-unit':'unit','f-stock':'stock','f-boom':'boom','f-knap':'knap','f-pivot':'pivot','f-wrate':'wrate','f-wunit':'wunit','f-min':'min','f-notes':'notes'}).forEach(([fid,key])=>{const el=document.getElementById(fid);if(el)el.value=item[key]||'';});
+  document.getElementById('f-id').value=id;
+  document.getElementById('inv-form-title').textContent='Edit: '+item.name;
+  document.getElementById('f-del').style.display='inline-block';
+  fToggleWet();window.scrollTo(0,0);
+}
+function fDelete(){
+  const id=parseInt(document.getElementById('f-id').value);if(!id)return;
+  const item=D.chems.find(c=>c.id===id);if(!item||!confirm('Delete '+item.name+'?'))return;
+  D.chems=D.chems.filter(c=>c.id!==id);save('chems');fClear();renderInv();renderCalcPills();renderEditList();
+}
+function renderEditList(){
+  const wrap=document.getElementById('f-edit-list');if(!D.chems.length){wrap.innerHTML='<div class="empty">No chemicals yet.</div>';return;}
+  let h='';
+  CATS.forEach(cat=>{
+    const items=D.chems.filter(c=>c.cat===cat);if(!items.length)return;
+    h+=`<div style="font-size:11px;font-weight:600;color:#666;margin:10px 0 4px">${CAT_L[cat]}</div>`;
+    items.forEach(item=>{h+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0eb"><div><span style="font-size:13px;font-weight:600">${item.name}</span><span style="font-size:11px;color:#888;margin-left:8px">${item.active||''}</span></div><div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px">${item.stock||0} ${item.unit}</span><button class="btn btns" onclick="fEdit(${item.id})">Edit</button></div></div>`;});
+  });
+  wrap.innerHTML=h;
+}
+
+// Stock Alerts
+function renderPlanChem(){const sel=document.getElementById('p-chem');const sp=D.chems.filter(c=>!['wetter','buffer','fertiliser'].includes(c.cat));sel.innerHTML='<option value="">— select —</option>';sp.forEach(c=>sel.innerHTML+=`<option value="${c.id}">${c.name}</option>`);}
+function addPlan(){
+  const cid=parseInt(document.getElementById('p-chem').value);if(!cid){alert('Select a chemical.');return;}
+  D.plans.push({id:Date.now(),cid,m:document.getElementById('p-meth').value,ha:parseFloat(document.getElementById('p-field').value)||0,date:document.getElementById('p-date').value,notes:document.getElementById('p-notes').value});
+  save('plans');document.getElementById('p-notes').value='';renderStockAlerts();
+}
+function remPlan(id){D.plans=D.plans.filter(p=>p.id!==id);save('plans');renderStockAlerts();}
+function renderStockAlerts(){
+  const lw=document.getElementById('p-list');
+  if(!D.plans.length){lw.innerHTML='<div style="font-size:12px;color:#999;margin-bottom:12px">No planned sprays yet.</div>';}
+  else{lw.innerHTML=`<div style="font-size:13px;font-weight:600;margin-bottom:6px">Planned sprays</div>`+D.plans.map(p=>{const item=D.chems.find(c=>c.id===p.cid);const r=item?rateFor(item,p.m):0;const qty=fmt(r*p.ha);return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0eb;font-size:12px"><div><span style="font-weight:600">${item?item.name:'?'}</span><span style="color:#666;margin-left:8px">${METH_L[p.m]} · ${p.ha} ha · ${p.date||'no date'}</span>${p.notes?`<span style="color:#999;margin-left:8px">${p.notes}</span>`:''}</div><div style="display:flex;align-items:center;gap:6px"><span>${qty} ${item?item.unit:''}</span><button class="btn btns btnr" onclick="remPlan(${p.id})">✕</button></div></div>`;}).join('');}
+  const res=document.getElementById('p-results');if(!D.plans.length){res.innerHTML='';return;}
+  const needed={};D.plans.forEach(p=>{const item=D.chems.find(c=>c.id===p.cid);if(!item)return;const r=rateFor(item,p.m);const qty=r*p.ha;if(!needed[p.cid])needed[p.cid]={item,total:0,uses:[]};needed[p.cid].total+=qty;needed[p.cid].uses.push({m:METH_L[p.m],ha:p.ha,qty:fmt(qty),date:p.date});});
+  let h='<div style="font-size:13px;font-weight:600;margin:12px 0 8px">Stock sufficiency check</div>';
+  Object.values(needed).forEach(({item,total,uses})=>{
+    const st=parseFloat(item.stock)||0;const ok=st>=total;const short=total-st;const pct=Math.min(100,Math.round(st/total*100));
+    h+=`<div class="scard" style="background:${ok?'white':'#fdf0f0'};border-color:${ok?'#e5e5e0':'#e74c3c'}"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px;font-weight:600">${item.name}</span><span style="color:${ok?'#1e7e34':'#c0392b'};font-weight:600">${ok?'✓ Sufficient':'⚠ Insufficient'}</span></div><div style="display:flex;gap:14px;font-size:12px;color:#666;margin-top:5px;flex-wrap:wrap"><span>In store: <strong>${st} ${item.unit}</strong></span><span>Needed: <strong>${fmt(total)} ${item.unit}</strong></span>${!ok?`<span style="color:#c0392b;font-weight:600">Buy ${fmt(short)} ${item.unit} more</span>`:''}</div><div class="bar-wrap" style="margin-top:6px"><div class="bar ${ok?'bar-ok':'bar-crit'}" style="width:${pct}%"></div></div><div style="margin-top:4px;font-size:10px;color:#999">${uses.map(u=>`${u.date||'?'}: ${u.m} ${u.ha}ha → ${u.qty} ${item.unit}`).join(' | ')}</div></div>`;
+  });
+  res.innerHTML=h;
+}
+
+// ============================================================
+// TASKS
+// ============================================================
+function addTask(){
+  const text=document.getElementById('tk-text').value.trim();if(!text){alert('Enter a task.');return;}
+  D.tasks.unshift({id:Date.now(),text,due:document.getElementById('tk-due').value,block:document.getElementById('tk-block').value,priority:document.getElementById('tk-pri').value,done:false});
+  save('tasks');document.getElementById('tk-text').value='';document.getElementById('tk-due').value='';renderAll();
+}
+function togTask(id){const t=D.tasks.find(x=>x.id===id);if(t){t.done=!t.done;save('tasks');renderAll();}}
+
+// ============================================================
+// REPORTS
+// ============================================================
+function renderReportList(){
+  const cl=document.getElementById('r-list');
+  if(!D.entries.length){cl.innerHTML='<div class="empty">No records yet.</div>';return;}
+  cl.innerHTML=D.entries.map(e=>{const pill=e.type==='fert'?'<span class="type-pill pill-f">FERT</span>':'<span class="type-pill pill-s">SPRAY</span>';return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5f5f0;font-size:13px"><input type="checkbox" checked data-id="${e.id}" style="width:14px;height:14px"><span style="min-width:80px;font-size:12px">${e.date}</span>${pill}<span style="flex:1">${e.tradename}</span><span style="font-size:11px;color:#888">${e.block}</span></div>`;}).join('');
+}
+function selAll(v){document.querySelectorAll('#r-list input[type=checkbox]').forEach(c=>c.checked=v);}
+function genReport(){
+  const sel=Array.from(document.querySelectorAll('#r-list input[type=checkbox]:checked')).map(c=>parseInt(c.dataset.id));
+  const rows=D.entries.filter(e=>sel.includes(e.id));
+  if(!rows.length){alert('Select at least one record.');return;}
+  document.getElementById('r-status').textContent='Generating report...';
+  // Build simple printable HTML report
+  const grower=document.getElementById('r-grower').value;
+  const farm=document.getElementById('r-farm').value;
+  const field=document.getElementById('r-field').value;
+  const crop=document.getElementById('r-crop').value;
+  const variety=document.getElementById('r-variety').value;
+  const from=document.getElementById('r-from').value;
+  const to=document.getElementById('r-to').value;
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>Spray Record — ${farm}</title><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}h2{font-size:14px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:12px}th{background:#1a3a2a;color:white;padding:5px 6px;text-align:left;font-size:10px}td{padding:4px 6px;border:1px solid #ddd;vertical-align:top;font-size:10px}.hdr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;font-size:11px}.hdr div span{font-weight:bold;display:block}@media print{body{margin:10px}}</style></head><body><h2>SPRAY RECORD SHEET — ${farm}</h2><div class="hdr"><div><span>Grower</span>${grower}</div><div><span>Farm</span>${farm}</div><div><span>Field ref</span>${field}</div><div><span>Crop</span>${crop}</div><div><span>Variety</span>${variety}</div><div><span>Season</span>${from||'—'} to ${to||'—'}</div></div><table><thead><tr><th>Date</th><th>Trade name</th><th>Active ingredient</th><th>Rate / ha</th><th>Ha</th><th>Total qty</th><th>PHI</th><th>Safe harvest</th><th>Method</th><th>Operator</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.date}</td><td>${r.tradename}</td><td>${r.active||'—'}</td><td>${r.rate||'—'}</td><td>${r.ha||'—'}</td><td>${r.qty||'—'}</td><td>${r.phi||'—'}</td><td>${getSafeDate(r)}</td><td>${r.method||'—'}</td><td>${r.operator||'—'}</td></tr>`).join('')}</tbody></table><p style="margin-top:20px;font-size:10px;color:#666">Generated: ${new Date().toLocaleDateString('en-GB')} · Midland Acres Farm Management</p><script>window.onload=()=>window.print();<\/script></body></html>`);
+  win.document.close();
+  document.getElementById('r-status').textContent='Report opened in new tab — use Ctrl+P or Cmd+P to print or save as PDF.';
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll(){
+  // Header date
+  document.getElementById('hdr-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  // Metrics
+  document.getElementById('ov-metrics').innerHTML=`
+    <div class="metric"><div class="label">Total area</div><div class="value">25 ha</div><div class="sub">2 paprika blocks</div></div>
+    <div class="metric"><div class="label">Season</div><div class="value">2025/26</div><div class="sub">Planted 1 Nov 2025</div></div>
+    <div class="metric"><div class="label">Spray/fert logs</div><div class="value">${D.entries.length}</div><div class="sub">this season</div></div>
+    <div class="metric"><div class="label">Irrigation logs</div><div class="value">${D.irr.length}</div><div class="sub">this season</div></div>
+    <div class="metric"><div class="label">Open tasks</div><div class="value">${D.tasks.filter(t=>!t.done).length}</div><div class="sub">pending</div></div>
+    <div class="metric"><div class="label">Chemicals</div><div class="value">${D.chems.length}</div><div class="sub">in inventory</div></div>`;
+  // Harvest
+  renderHarvest();
+  // Recent activity
+  const all=[...D.irr.slice(0,3).map(r=>({date:r.date,text:'Irrigation — '+r.block,detail:r.mm?r.mm+' mm':r.duration?r.duration+' hrs':''})),...D.entries.slice(0,4).map(e=>({date:e.date,text:(e.type==='fert'?'Fert':'Spray')+' — '+e.tradename,detail:e.block+(e.rate?' · '+e.rate:'')})),...D.qacts.slice(0,3).map(a=>({date:a.date,text:'Pivot '+a.type+' — '+a.quarter,detail:a.tradename||a.fertName||(a.mm?a.mm+'mm':'')}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  document.getElementById('recent-act').innerHTML=all.length?all.map(a=>`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f5f0"><div><div style="font-size:13px;font-weight:600">${a.text}</div><div style="font-size:11px;color:#888">${a.detail}</div></div><div style="font-size:11px;color:#bbb">${a.date}</div></div>`).join(''):'<div class="empty">No activity yet.</div>';
+  // Irrigation table
+  const ib=document.getElementById('i-body');ib.innerHTML='';D.irr.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.date}</td><td style="font-size:11px">${r.block}</td><td>${r.method||'—'}</td><td>${r.duration?r.duration+' hrs':'—'}</td><td>${r.mm?r.mm+' mm':'—'}</td><td style="color:#888">${r.notes||'—'}</td>`;ib.appendChild(tr);});
+  document.getElementById('i-tbl').style.display=D.irr.length?'':'none';document.getElementById('i-empty').style.display=D.irr.length?'none':'';
+  // Tasks
+  const tl=document.getElementById('tk-list');tl.innerHTML='';
+  [...D.tasks.filter(t=>!t.done),...D.tasks.filter(t=>t.done)].forEach(t=>{
+    const div=document.createElement('div');div.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f5f5f0';
+    const pb=t.priority==='High'?`<span class="badge b-red" style="margin-left:6px">High</span>`:'';
+    div.innerHTML=`<input type="checkbox" style="margin-top:2px;width:15px;height:15px;cursor:pointer" ${t.done?'checked':''} onchange="togTask(${t.id})"><div style="flex:1"><div style="font-size:13px;${t.done?'text-decoration:line-through;color:#bbb':''}">${t.text}${pb}</div><div style="font-size:11px;color:#aaa">${t.block}${t.due?' · Due '+t.due:''}</div></div>`;
+    tl.appendChild(div);
+  });
+  document.getElementById('tk-empty').style.display=D.tasks.length?'none':'';
+  // Inventory
+  renderInv();renderEditList();
+  // Log
+  renderLog();
+  // Set date defaults
+  ['e-date','i-date','p-date'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today();});
+  // Q cards
+  renderQCards();
+}
+
+// ============================================================
+// TAB NAVIGATION
+// ============================================================
+function ST(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#main-nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+  if(id==='calendar'){renderCalendar('A');renderCalendar('B');}
+  if(id==='pivot')renderQCards();
+  if(id==='spraylog'||id==='reports')renderLog();
+  if(id==='inventory'){renderInv();renderCalcPills();renderEditList();}
+}
+
+// ============================================================
+// INIT
+// ============================================================
+load();
+renderCalendar('A');renderCalendar('B');
+renderAll();
+eCatChange();
+eBlockChange();
+</script>
+</body>
+</html>
